@@ -1,48 +1,35 @@
-import time
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
+import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 
+URL = "https://library.uniquindio.edu.co/databases"
 
-class ACMDownloader:
-    def __init__(self, download_dir, headless=True):
-        options = webdriver.ChromeOptions()
-        if headless:
-            options.add_argument("--headless=new")
-        options.add_argument("--window-size=1920,1080")
-        prefs = {"download.default_directory": download_dir}
-        options.add_experimental_option("prefs", prefs)
+# Navegador oculto
+driver = uc.Chrome(headless=True)
+wait = WebDriverWait(driver, 30)
 
-        service = Service(ChromeDriverManager().install())
-        self.driver = webdriver.Chrome(service=service, options=options)
-        self.wait = WebDriverWait(self.driver, 20)
+try:
+    # Abrir página
+    driver.get(URL)
+    wait.until(lambda d: d.execute_script("return document.readyState") == "complete")
+    print("[OK] Página inicial cargada:", driver.current_url)
 
-    def download(self, query):
-        try:
-            print("[INFO] Abriendo ACM Digital Library...")
-            self.driver.get("https://dl.acm.org/")
+    # Esperar que desaparezca el overlay de carga
+    try:
+        wait.until(EC.invisibility_of_element_located((By.CLASS_NAME, "onload-background")))
+        print("[OK] Overlay de carga eliminado.")
+    except:
+        print("[WARN] No se encontró overlay o ya estaba oculto.")
 
-            wrapper = self.wait.until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "div.autoComplete_wrapper"))
-            )
-            search_box = wrapper.find_element(By.CSS_SELECTOR, "input[name='AllField']")
-            self.driver.execute_script("arguments[0].scrollIntoView(true);", search_box)
-            time.sleep(0.5)
-            search_box.click()
-            search_box.clear()
-            search_box.send_keys(query)
-            search_box.submit()
+    # Clic en "BASES DATOS x FACULTAD"
+    link = wait.until(EC.element_to_be_clickable((By.LINK_TEXT, "BASES DATOS x FACULTAD")))
+    link.click()
+    print("[OK] Se hizo clic en 'BASES DATOS x FACULTAD'.")
 
-            self.wait.until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "li.search__item"))
-            )
+except Exception as e:
+    print(f"[ERROR] {e}")
 
-            print(f"[INFO] Resultados de ACM para '{query}' descargados (simulación).")
-        except Exception as e:
-            print(f"[ERROR] No se pudo buscar en ACM: {e}")
-
-    def close(self):
-        self.driver.quit()
+finally:
+    driver.quit()
+    print("[INFO] Navegador cerrado.")
