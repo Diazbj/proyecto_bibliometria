@@ -75,9 +75,9 @@ class ACMDescarga:
             new_name = os.path.join(self.download_dir, f"pagina_{page_num:02d}.bib")
             try:
                 shutil.move(last_file, new_name)
-                print(f"📂 Archivo renombrado a {new_name}")
+                print(f" Archivo renombrado a {new_name}")
             except Exception as e:
-                print(f"⚠️ Error al renombrar archivo: {e}")
+                print(f"Error al renombrar archivo: {e}")
 
     def abrir_base_datos(self, query):
         self.driver.get("https://library.uniquindio.edu.co/databases")
