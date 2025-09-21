@@ -2,35 +2,44 @@ import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 import time
 import os
 import glob
 import shutil
 import tempfile
+import random
+
+
+def human_wait(min_s=3, max_s=7):
+    """Pausa aleatoria para simular comportamiento humano"""
+    t = random.uniform(min_s, max_s)
+    time.sleep(t)
+    return t
+
+
+def random_scroll(driver):
+    """Simula scroll humano en posiciones aleatorias de la página"""
+    try:
+        scroll_height = driver.execute_script("return document.body.scrollHeight")
+        rand_position = random.randint(0, scroll_height)
+        driver.execute_script(f"window.scrollTo(0, {rand_position});")
+        human_wait(1, 4)
+    except:
+        pass
 
 
 class ScienceDirectDescarga():
     def __init__(self):
-        # Carpeta base de descargas en tu proyecto
         base_dir = r"C:\Users\DiazJ\PycharmProjects\ProyectoAnalisisAlgoritmo\proyecto_bibliometria\descargas"
-
-        # Subcarpeta descargaScienceDirect dentro de esa ruta
         self.download_dir = os.path.join(base_dir, "descargaScienceDirect")
         os.makedirs(self.download_dir, exist_ok=True)
 
-        # Configuración Chrome
-        tmp_profile = tempfile.mkdtemp()  # perfil temporal
+        tmp_profile = tempfile.mkdtemp()
         options = uc.ChromeOptions()
-
         options.add_argument(f"--user-data-dir={tmp_profile}")
         options.add_argument("--profile-directory=Default")
-
-        # 🔑 Desactivar sincronización de cuenta y popup de acceso
-        options.add_argument("--disable-features=AccountConsistency")
-        options.add_argument("--disable-features=ChromeWhatsNewUI")
-        options.add_argument("--disable-features=SignInProfileCreation")
-        options.add_argument("--disable-features=SigninFrameSignInFlow")
-        options.add_argument("--disable-features=EnableEphemeralGuestProfilesOnDesktop")
+        options.add_argument("--disable-features=AccountConsistency,ChromeWhatsNewUI,SignInProfileCreation,SigninFrameSignInFlow,EnableEphemeralGuestProfilesOnDesktop")
         options.add_argument("--disable-sync")
         options.add_argument("--no-first-run")
         options.add_argument("--no-default-browser-check")
@@ -38,7 +47,6 @@ class ScienceDirectDescarga():
         options.add_argument("--disable-notifications")
         options.add_argument("--disable-infobars")
 
-        # Configurar descargas automáticas
         prefs = {
             "download.default_directory": self.download_dir,
             "download.prompt_for_download": False,
@@ -47,36 +55,33 @@ class ScienceDirectDescarga():
         }
         options.add_experimental_option("prefs", prefs)
 
-        # Abrir Chrome con las opciones configuradas
         self.driver = uc.Chrome(headless=False, options=options)
         self.wait = WebDriverWait(self.driver, 20)
         self.wait_long = WebDriverWait(self.driver, 40)
         self.driver.maximize_window()
 
     def esperar_overlay(self):
-        """Espera a que desaparezca el overlay de carga."""
         try:
             self.wait.until(EC.invisibility_of_element_located((By.CLASS_NAME, "onload-background")))
         except:
             pass
 
     def aceptar_cookies(self):
-        """Acepta cookies si aparecen."""
         try:
             cookie_btn = WebDriverWait(self.driver, 3).until(
                 EC.element_to_be_clickable((By.ID, "CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll"))
             )
             cookie_btn.click()
             print("🍪 Cookies aceptadas.")
+            human_wait(2, 4)
         except:
             pass
 
-    def esperar_descarga(self, timeout=120):
-        """Espera hasta que no haya archivos .crdownload en la carpeta."""
+    def esperar_descarga(self, timeout=180):
         start_time = time.time()
         while True:
             cr_files = glob.glob(os.path.join(self.download_dir, "*.crdownload"))
-            if not cr_files:  # no hay descargas en progreso
+            if not cr_files:
                 break
             if time.time() - start_time > timeout:
                 print("⚠️ Tiempo de espera agotado para la descarga.")
@@ -84,7 +89,6 @@ class ScienceDirectDescarga():
             time.sleep(1)
 
     def renombrar_descarga(self, page_num):
-        """Renombra el último archivo descargado a extensión .bib"""
         files = sorted(
             glob.glob(os.path.join(self.download_dir, "*")),
             key=os.path.getmtime,
@@ -100,15 +104,14 @@ class ScienceDirectDescarga():
                 print(f"⚠️ Error al renombrar archivo: {e}")
 
     def login_institucional(self, correo, password):
-        """Hace login institucional con Google en el proxy UQ"""
         try:
             google_btn = self.wait.until(
                 EC.element_to_be_clickable((By.ID, "btn-google"))
             )
             google_btn.click()
-            print("✅ Click en 'Iniciar sesión con Google'")
-
+            print(" Click en 'Iniciar sesión con Google'")
             self.driver.switch_to.window(self.driver.window_handles[-1])
+            human_wait(3, 6)
 
             try:
                 email_input = self.wait.until(
@@ -117,6 +120,7 @@ class ScienceDirectDescarga():
                 email_input.send_keys(correo)
                 email_input.send_keys(u'\ue007')
                 print("📧 Correo ingresado")
+                human_wait(2, 4)
             except:
                 print("ℹ️ No pidió correo.")
 
@@ -124,12 +128,12 @@ class ScienceDirectDescarga():
                 password_input = self.wait_long.until(
                     EC.presence_of_element_located((By.NAME, "Passwd"))
                 )
-                time.sleep(1)
                 password_input.send_keys(password)
                 password_input.send_keys(u'\ue007')
                 print("🔑 Contraseña ingresada")
+                human_wait(2, 5)
             except:
-                print("ℹ️ No pidió contraseña.")
+                print(" No pidió contraseña.")
 
             self.wait_long.until(EC.url_contains("sciencedirect.com"))
             print("🚀 Login exitoso, ahora en ScienceDirect")
@@ -138,46 +142,75 @@ class ScienceDirectDescarga():
             print(f"⚠️ Error durante login institucional: {e}")
 
     def seleccionar_checkbox(self):
-        """Selecciona la casilla de verificación <span class='checkbox-check'>"""
         try:
-            label = self.wait.until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, "label[for='select-all-results']"))
+            self.driver.execute_script("window.scrollTo(0, 0);")
+            human_wait(2, 5)
+
+            checkbox = self.wait.until(
+                EC.presence_of_element_located((By.ID, "select-all-results"))
             )
-            label.click()
-            print("✅ Checkbox seleccionado correctamente.")
-        except Exception as e:
-            print(f"⚠️ No se pudo seleccionar el checkbox con label: {e}")
-            try:
-                checkbox = self.driver.find_element(By.ID, "select-all-results")
+
+            if checkbox.is_selected():
                 self.driver.execute_script("arguments[0].click();", checkbox)
-                print("✅ Checkbox forzado con JS.")
-            except Exception as e2:
-                print(f"❌ Falló también con JS: {e2}")
+                human_wait(1, 2)
+
+            self.driver.execute_script("arguments[0].click();", checkbox)
+            print("✅ Checkbox marcado en esta página.")
+            human_wait(2, 4)
+
+        except Exception as e:
+            print(f"⚠️ Error al seleccionar checkbox: {e}")
 
     def exportar_bibtex(self):
-        """Hace clic en Export y luego en Export citation to BibTeX"""
         try:
-            # Clic en el botón Export
+            self.driver.execute_script("window.scrollTo(0, 0);")
+            human_wait(2, 5)
+
             export_btn = self.wait.until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, "button.export-all-link-button"))
             )
-            export_btn.click()
+            ActionChains(self.driver).move_to_element(export_btn).perform()
+            self.driver.execute_script("arguments[0].click();", export_btn)
             print("📤 Menú Export abierto.")
+            human_wait(2, 4)
 
-            # Clic en el botón Export citation to BibTeX
             bibtex_btn = self.wait.until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-aa-button='srp-export-multi-bibtex']"))
             )
-            bibtex_btn.click()
-            print("📂 Exportación a BibTeX lanzada.")
+            self.driver.execute_script("arguments[0].click();", bibtex_btn)
+            print("📥 Exportación a BibTeX lanzada.")
 
-            # Esperamos a que la descarga se complete
             self.esperar_descarga()
+            human_wait(3, 6)
 
         except Exception as e:
             print(f"⚠️ No se pudo exportar a BibTeX: {e}")
 
-    def abrir_base_datos(self, query, correo, password):
+    def ir_a_siguiente_pagina(self, page_num):
+        try:
+            siguiente = self.wait.until(
+                EC.element_to_be_clickable((By.XPATH, "//a[@data-aa-name='srp-next-page']"))
+            )
+            self.driver.execute_script("arguments[0].click();", siguiente)
+            print("➡️ Pasando a la siguiente página")
+            self.esperar_overlay()
+
+            # Scroll humano después de cargar la página
+            random_scroll(self.driver)
+
+            # Pausa especial cada 20 páginas
+            if page_num % 20 == 0:
+                print("😴 Descanso largo para evitar bloqueos...")
+                human_wait(120, 300)  # 2 a 5 minutos
+            else:
+                human_wait(8, 18)  # pausas normales más largas
+
+            return True
+        except:
+            print("⛔ No hay más páginas disponibles.")
+            return False
+
+    def abrir_base_datos(self, query, correo, password, max_paginas=2):
         self.driver.get("https://library.uniquindio.edu.co/databases")
         self.esperar_overlay()
 
@@ -192,7 +225,7 @@ class ScienceDirectDescarga():
         self.esperar_overlay()
 
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(2)
+        human_wait(2, 4)
 
         enlaces = self.wait_long.until(
             EC.presence_of_all_elements_located((By.XPATH, "//a[@href]"))
@@ -212,10 +245,9 @@ class ScienceDirectDescarga():
         print("🔗 Click en ScienceDirect (Descubridor)")
 
         self.driver.switch_to.window(self.driver.window_handles[-1])
-        print("✅ Cambiado a pestaña de proxy UQ")
+        print("📑 Cambiado a pestaña de proxy UQ")
 
         self.login_institucional(correo, password)
-
         self.aceptar_cookies()
 
         try:
@@ -229,20 +261,22 @@ class ScienceDirectDescarga():
                 EC.element_to_be_clickable((By.CSS_SELECTOR, "button.button.button-primary"))
             )
             search_btn.click()
-
             print(f"🔎 Búsqueda lanzada en ScienceDirect: {query}")
+            human_wait(4, 7)
 
-            # ✅ Seleccionamos el checkbox
-            self.seleccionar_checkbox()
+            for i in range(1, max_paginas + 1):
+                if i > 1:
+                    if not self.ir_a_siguiente_pagina(i):
+                        break
 
-            # ✅ Exportamos a BibTeX
-            self.exportar_bibtex()
+                self.seleccionar_checkbox()
+                self.exportar_bibtex()
+                self.renombrar_descarga(i)
 
         except Exception as e:
-            print(f"⚠️ No se encontró el cuadro de búsqueda: {e}")
+            print(f"⚠️ Error en búsqueda o exportación: {e}")
 
     def cerrar(self):
-        """Cerrar navegador de forma segura"""
         try:
             self.driver.quit()
         except:
@@ -254,7 +288,8 @@ if __name__ == "__main__":
     bot.abrir_base_datos(
         query="\"generative artificial intelligence\"",
         correo="jfdiazb@uqvirtual.edu.co",
-        password="Lily1007"
+        password="Lily1007",
+        max_paginas=172
     )
-    time.sleep(60)
+    human_wait(5, 10)
     bot.cerrar()
