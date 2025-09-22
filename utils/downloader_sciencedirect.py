@@ -72,7 +72,7 @@ class ScienceDirectDescarga():
                 EC.element_to_be_clickable((By.ID, "CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll"))
             )
             cookie_btn.click()
-            print("🍪 Cookies aceptadas.")
+            print(" Cookies aceptadas.")
             human_wait(2, 4)
         except:
             pass
@@ -84,7 +84,7 @@ class ScienceDirectDescarga():
             if not cr_files:
                 break
             if time.time() - start_time > timeout:
-                print("⚠️ Tiempo de espera agotado para la descarga.")
+                print(" Tiempo de espera agotado para la descarga.")
                 break
             time.sleep(1)
 
@@ -99,9 +99,9 @@ class ScienceDirectDescarga():
             new_name = os.path.join(self.download_dir, f"pagina_{page_num:02d}.bib")
             try:
                 shutil.move(last_file, new_name)
-                print(f"📂 Archivo renombrado a {new_name}")
+                print(f"Archivo renombrado a {new_name}")
             except Exception as e:
-                print(f"⚠️ Error al renombrar archivo: {e}")
+                print(f" Error al renombrar archivo: {e}")
 
     def login_institucional(self, correo, password):
         try:
@@ -122,7 +122,7 @@ class ScienceDirectDescarga():
                 print("📧 Correo ingresado")
                 human_wait(2, 4)
             except:
-                print("ℹ️ No pidió correo.")
+                print(" No pidió correo.")
 
             try:
                 password_input = self.wait_long.until(
@@ -130,16 +130,16 @@ class ScienceDirectDescarga():
                 )
                 password_input.send_keys(password)
                 password_input.send_keys(u'\ue007')
-                print("🔑 Contraseña ingresada")
+                print(" Contraseña ingresada")
                 human_wait(2, 5)
             except:
                 print(" No pidió contraseña.")
 
             self.wait_long.until(EC.url_contains("sciencedirect.com"))
-            print("🚀 Login exitoso, ahora en ScienceDirect")
+            print(" Login exitoso, ahora en ScienceDirect")
 
         except Exception as e:
-            print(f"⚠️ Error durante login institucional: {e}")
+            print(f" Error durante login institucional: {e}")
 
     def seleccionar_checkbox(self):
         try:
@@ -155,11 +155,11 @@ class ScienceDirectDescarga():
                 human_wait(1, 2)
 
             self.driver.execute_script("arguments[0].click();", checkbox)
-            print("✅ Checkbox marcado en esta página.")
+            print(" Checkbox marcado en esta página.")
             human_wait(2, 4)
 
         except Exception as e:
-            print(f"⚠️ Error al seleccionar checkbox: {e}")
+            print(f" Error al seleccionar checkbox: {e}")
 
     def exportar_bibtex(self):
         try:
@@ -184,7 +184,7 @@ class ScienceDirectDescarga():
             human_wait(3, 6)
 
         except Exception as e:
-            print(f"⚠️ No se pudo exportar a BibTeX: {e}")
+            print(f" No se pudo exportar a BibTeX: {e}")
 
     def ir_a_siguiente_pagina(self, page_num):
         try:
@@ -200,14 +200,14 @@ class ScienceDirectDescarga():
 
             # Pausa especial cada 20 páginas
             if page_num % 20 == 0:
-                print("😴 Descanso largo para evitar bloqueos...")
+                print(" Descanso largo para evitar bloqueos...")
                 human_wait(120, 300)  # 2 a 5 minutos
             else:
                 human_wait(8, 18)  # pausas normales más largas
 
             return True
         except:
-            print("⛔ No hay más páginas disponibles.")
+            print(" No hay más páginas disponibles.")
             return False
 
     def abrir_base_datos(self, query, correo, password, max_paginas=2):
@@ -239,13 +239,13 @@ class ScienceDirectDescarga():
                 break
 
         if not enlace_sciencedirect:
-            raise Exception("❌ No se encontró el enlace de ScienceDirect en la página")
+            raise Exception(" No se encontró el enlace de ScienceDirect en la página")
 
         self.driver.execute_script("arguments[0].click();", enlace_sciencedirect)
         print("🔗 Click en ScienceDirect (Descubridor)")
 
         self.driver.switch_to.window(self.driver.window_handles[-1])
-        print("📑 Cambiado a pestaña de proxy UQ")
+        print(" Cambiado a pestaña de proxy UQ")
 
         self.login_institucional(correo, password)
         self.aceptar_cookies()
@@ -261,7 +261,7 @@ class ScienceDirectDescarga():
                 EC.element_to_be_clickable((By.CSS_SELECTOR, "button.button.button-primary"))
             )
             search_btn.click()
-            print(f"🔎 Búsqueda lanzada en ScienceDirect: {query}")
+            print(f" Búsqueda lanzada en ScienceDirect: {query}")
             human_wait(4, 7)
 
             for i in range(1, max_paginas + 1):
@@ -274,7 +274,7 @@ class ScienceDirectDescarga():
                 self.renombrar_descarga(i)
 
         except Exception as e:
-            print(f"⚠️ Error en búsqueda o exportación: {e}")
+            print(f" Error en búsqueda o exportación: {e}")
 
     def cerrar(self):
         try:
