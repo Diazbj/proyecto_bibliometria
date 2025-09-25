@@ -2,27 +2,19 @@ import re
 import time
 
 # -------------------------------
-# Comb Sort
+# Selection Sort optimizado
 # -------------------------------
-def getNextGap(gap):
-    gap = (gap * 10) // 13
-    if gap < 1:
-        return 1
-    return gap
-
-def combSort(arr, key=lambda x: x):
+def selectionSort(arr, key=lambda x: x):
     n = len(arr)
-    gap = n
-    swapped = True
-
-    while gap != 1 or swapped:
-        gap = getNextGap(gap)
-        swapped = False
-
-        for i in range(0, n - gap):
-            if key(arr[i]) > key(arr[i + gap]):
-                arr[i], arr[i + gap] = arr[i + gap], arr[i]
-                swapped = True
+    for i in range(n - 1):
+        min_idx = i
+        min_val = key(arr[i])   # cachear valor inicial
+        for j in range(i + 1, n):
+            val = key(arr[j])
+            if val < min_val:
+                min_idx = j
+                min_val = val
+        arr[i], arr[min_idx] = arr[min_idx], arr[i]
 
 
 # -------------------------------
@@ -44,17 +36,22 @@ def extraer_datos(entrada):
 # Filtrar entradas válidas
 entradas = [e.strip() for e in entradas if e.strip()]
 
-# Ordenar usando combSort con clave (year, title)
+# Preprocesar claves una sola vez
+entradas_con_clave = [(extraer_datos(e), e) for e in entradas]
+
+# Ordenar usando Selection Sort con clave precalculada
 start_time = time.perf_counter()
-combSort(entradas, key=lambda e: extraer_datos(e))
+selectionSort(entradas_con_clave, key=lambda x: x[0])
 end_time = time.perf_counter()
 
+# Recuperar solo las entradas ordenadas
+entradas = [e for _, e in entradas_con_clave]
+
 # Guardar archivo ordenado
-with open("articulos_ordenados_combSort.bib", "w", encoding="utf-8") as f:
+with open("articulos_ordenados_selectionSort.bib", "w", encoding="utf-8") as f:
     for e in entradas:
         f.write(e + "\n\n")
 
-print("Ordenamiento completado con CombSort ✅")
+print("Ordenamiento completado con Selection Sort")
 print(f"Total entradas: {len(entradas)}")
 print(f"Tiempo: {end_time - start_time:.6f} segundos")
-
