@@ -59,7 +59,7 @@ class ACMDescarga:
             if not cr_files:  # no hay descargas en progreso
                 break
             if time.time() - start_time > timeout:
-                print("⚠️ Tiempo de espera agotado para la descarga.")
+                print(" Tiempo de espera agotado para la descarga.")
                 break
             time.sleep(1)  # espera 1 segundo y revisa de nuevo
 
@@ -150,7 +150,7 @@ class ACMDescarga:
             print(f"⏳ Esperando descarga de página {page_num} ...")
             self.esperar_descarga(timeout=120)
             self.renombrar_descarga(page_num)  # <-- Renombrar a .bib
-            print(f"✅ Página {page_num} descargada.")
+            print(f" Página {page_num} descargada.")
 
             # Cerrar modal
             try:
@@ -174,9 +174,9 @@ class ACMDescarga:
                     (By.CSS_SELECTOR, "li.search__item.issue-item-container")
                 ))
                 page_num += 1
-                print("➡️ Página siguiente cargada.")
+                print(" Página siguiente cargada.")
             except:
-                print("🏁 No hay más páginas.")
+                print(" No hay más páginas.")
                 break
 
     def cerrar(self):
