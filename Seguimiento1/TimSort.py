@@ -1,3 +1,4 @@
+import re
 import time
 
 MIN_MERGE = 32
@@ -9,26 +10,21 @@ def calcMinRun(n):
         n >>= 1
     return n + r
 
-# Insertion Sort entre índices left y right
-def insertionSort(arr, left, right):
+def insertionSort(arr, left, right, key=lambda x: x):
     for i in range(left + 1, right + 1):
         j = i
-        while j > left and arr[j] < arr[j - 1]:
+        while j > left and key(arr[j]) < key(arr[j - 1]):
             arr[j], arr[j - 1] = arr[j - 1], arr[j]
             j -= 1
 
-# Fusión de dos subarreglos
-def merge(arr, l, m, r):
-    len1, len2 = m - l + 1, r - m
-    left, right = [], []
-    for i in range(0, len1):
-        left.append(arr[l + i])
-    for i in range(0, len2):
-        right.append(arr[m + 1 + i])
+def merge(arr, l, m, r, key=lambda x: x):
+    left = arr[l:m+1]
+    right = arr[m+1:r+1]
 
-    i, j, k = 0, 0, l
-    while i < len1 and j < len2:
-        if left[i] <= right[j]:
+    i = j = 0
+    k = l
+    while i < len(left) and j < len(right):
+        if key(left[i]) <= key(right[j]):
             arr[k] = left[i]
             i += 1
         else:
@@ -36,25 +32,23 @@ def merge(arr, l, m, r):
             j += 1
         k += 1
 
-    while i < len1:
+    while i < len(left):
         arr[k] = left[i]
-        k += 1
         i += 1
-
-    while j < len2:
-        arr[k] = right[j]
         k += 1
-        j += 1
 
-# Timsort iterativo
-def timSort(arr):
+    while j < len(right):
+        arr[k] = right[j]
+        j += 1
+        k += 1
+
+def timSort(arr, key=lambda x: x):
     n = len(arr)
     minRun = calcMinRun(n)
 
-    # Ordenar subarreglos con insertion sort
     for start in range(0, n, minRun):
         end = min(start + minRun - 1, n - 1)
-        insertionSort(arr, start, end)
+        insertionSort(arr, start, end, key)
 
     size = minRun
     while size < n:
@@ -62,20 +56,37 @@ def timSort(arr):
             mid = min(n - 1, left + size - 1)
             right = min((left + 2 * size - 1), (n - 1))
             if mid < right:
-                merge(arr, left, mid, right)
+                merge(arr, left, mid, right, key)
         size = 2 * size
 
 
-#  Parte principal del script
-with open("numeros.txt", "r") as f:
-    numbers = [int(line.strip()) for line in f if line.strip().isdigit()]
+# -------------------------------
+# Parte principal para .bib
+# -------------------------------
+with open("articulos_con_titulo_y_abstract.bib", "r", encoding="utf-8") as f:
+    contenido = f.read()
 
+# Separar entradas .bib
+entradas = re.split(r'(?=@\w+{)', contenido, flags=re.MULTILINE)
+
+def extraer_datos(entrada):
+    year_match = re.search(r'year\s*=\s*{(\d+)}', entrada)
+    title_match = re.search(r'title\s*=\s*{(.+?)}', entrada, flags=re.DOTALL)
+    year = int(year_match.group(1)) if year_match else 9999
+    title = title_match.group(1).strip() if title_match else ""
+    return year, title
+
+# Filtrar entradas válidas
+entradas = [e.strip() for e in entradas if e.strip()]
+
+# Ordenar usando timSort con clave (year, title)
 start_time = time.perf_counter()
-timSort(numbers)
+timSort(entradas, key=lambda e: extraer_datos(e))
 end_time = time.perf_counter()
 
-with open("numeros_timsort.txt", "w") as f:
-    for num in numbers:
-        f.write(f"{num}\n")
+# Guardar archivo ordenado
+with open("articulos_ordenados_timSort.bib", "w", encoding="utf-8") as f:
+    for e in entradas:
+        f.write(e + "\n\n")
 
-print(f"TimSort completado. Tamaño: {len(numbers)} - Tiempo: {end_time - start_time:.6f} segundos")
+print(f"Ordenamiento completado. Total entradas: {len(entradas)} - Tiempo: {end_time - start_time:.6f} segundos")
