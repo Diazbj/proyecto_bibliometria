@@ -2,18 +2,32 @@ import re
 import time
 
 # -------------------------------
-# Counting Sort auxiliar para Radix Sort
+# Funciones auxiliares
+# -------------------------------
+
+def extraer_year(entrada):
+    """Extrae el año de una entrada .bib (devuelve 9999 si no existe)."""
+    year_match = re.search(r'year\s*=\s*[{"](\d+)[}"]', entrada)
+    return int(year_match.group(1)) if year_match else 9999
+
+def extraer_titulo(entrada):
+    """Extrae el título de una entrada .bib (cadena vacía si no existe)."""
+    title_match = re.search(r'(?m)^\s*title\s*=\s*[{"](.+?)[}"]', entrada, flags=re.DOTALL)
+    return title_match.group(1).strip().lower() if title_match else ""
+
+# -------------------------------
+# Counting Sort para Radix
 # -------------------------------
 
 def counting_sort(arr, exp):
-    """Counting Sort estable aplicado a un dígito específico (exp)"""
+    """Counting Sort estable por dígito del año sin usar clave–valor."""
     n = len(arr)
     output = [None] * n
     count = [0] * 10
 
-    # Contar ocurrencias del dígito
+    # Contar ocurrencias según el dígito actual
     for i in range(n):
-        year = arr[i][0][0]  # usamos el año como clave principal
+        year = extraer_year(arr[i])
         index = (year // exp) % 10
         count[index] += 1
 
@@ -21,87 +35,70 @@ def counting_sort(arr, exp):
     for i in range(1, 10):
         count[i] += count[i - 1]
 
-    # Construir salida (estable)
+    # Construir salida estable (de atrás hacia adelante)
     i = n - 1
     while i >= 0:
-        year = arr[i][0][0]
+        year = extraer_year(arr[i])
         index = (year // exp) % 10
         output[count[index] - 1] = arr[i]
         count[index] -= 1
         i -= 1
 
-    # Copiar de vuelta
+    # Copiar de vuelta al arreglo original
     for i in range(n):
         arr[i] = output[i]
-
 
 # -------------------------------
 # Radix Sort principal
 # -------------------------------
 
 def radix_sort(arr):
-    """Radix Sort usando Counting Sort en base al año"""
+    """Radix Sort fiel al algoritmo original (solo por año)."""
     if not arr:
         return arr
 
-    # Encontrar el máximo año
-    max_year = max(k[0] for k, _ in arr)
+    # Encontrar el año máximo
+    max_year = max(extraer_year(e) for e in arr)
 
-    # Ordenar por cada dígito del año
+    # Ordenar por cada dígito (LSD -> MSD)
     exp = 1
     while max_year // exp > 0:
         counting_sort(arr, exp)
         exp *= 10
 
-    # 🔹 Dentro de los mismos años, ordenar por título
-    arr.sort(key=lambda x: (x[0][0], x[0][1]))
-
-
-# -------------------------------
-# Funciones para trabajar con .bib
-# -------------------------------
-
-def extraer_datos(entrada):
-    """Extrae (año, título) como clave de ordenamiento"""
-    year_match = re.search(r'year\s*=\s*{?(\d{4})}?', entrada, flags=re.IGNORECASE)
-    title_match = re.search(r'(?m)^\s*title\s*=\s*{(.+?)}',
-                            entrada, flags=re.DOTALL | re.IGNORECASE)
-
-    year = int(year_match.group(1)) if year_match else 9999
-    title = title_match.group(1).strip().lower() if title_match else ""
-    return (year, title)
-
+    # Paso adicional: ordenar por título dentro de cada grupo con el mismo año
+    i = 0
+    while i < len(arr):
+        j = i + 1
+        while j < len(arr) and extraer_year(arr[j]) == extraer_year(arr[i]):
+            j += 1
+        # Ordenar el subgrupo [i:j] por título
+        arr[i:j] = sorted(arr[i:j], key=extraer_titulo)
+        i = j
 
 # -------------------------------
-# Parte principal
+# Parte principal para .bib
 # -------------------------------
 if __name__ == "__main__":
-    # Leer archivo .bib
+    # 1️⃣ Leer archivo original
     with open("articulos_con_titulo_y_abstract.bib", "r", encoding="utf-8") as f:
         contenido = f.read()
 
-    # Separar entradas .bib
+    # 2️⃣ Separar entradas
     entradas = re.split(r'(?=@\w+{)', contenido, flags=re.MULTILINE)
     entradas = [e.strip() for e in entradas if e.strip()]
 
-    # Preprocesar claves (año, título)
-    entradas_con_clave = [(extraer_datos(e), e) for e in entradas]
-
-    # Ordenar con Radix Sort
+    # 3️⃣ Ordenar con Radix Sort
     start_time = time.perf_counter()
-    radix_sort(entradas_con_clave)
+    radix_sort(entradas)
     end_time = time.perf_counter()
 
-    # Extraer artículos ordenados
-    entradas_ordenadas = [e for _, e in entradas_con_clave]
-
-    # Guardar archivo ordenado
+    # 4️⃣ Guardar archivo ordenado
     with open("articulos_ordenados_radixSort.bib", "w", encoding="utf-8") as f:
-        for e in entradas_ordenadas:
+        for e in entradas:
             f.write(e + "\n\n")
 
-    # Reporte
-    print("Ordenamiento completado con Radix Sort ✅")
-    print(f"Total entradas: {len(entradas_ordenadas)}")
-    print(f"Tiempo: {end_time - start_time:.6f} segundos")
-    print("Complejidad teórica Radix Sort: O(d·(n + k))")
+    # 5️⃣ Reporte
+    print("✅ Ordenamiento completado con Radix Sort (fiel al algoritmo)")
+    print(f"Total entradas: {len(entradas)}")
+    print(f"⏱️ Tiempo: {end_time - start_time:.6f} segundos")

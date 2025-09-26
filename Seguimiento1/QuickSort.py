@@ -1,80 +1,89 @@
 import re
 import time
+import sys
+
+# (Opcional) Aumentar el límite de recursión para archivos grandes
+sys.setrecursionlimit(10000)
 
 # -------------------------------
-# Algoritmo Quick Sort
+# Funciones auxiliares para extraer datos
+# -------------------------------
+
+def extraer_year(entrada):
+    """Extrae el año de una entrada .bib (9999 si no existe)."""
+    year_match = re.search(r'year\s*=\s*{?(\d{4})}?', entrada, flags=re.IGNORECASE)
+    return int(year_match.group(1)) if year_match else 9999
+
+def extraer_titulo(entrada):
+    """Extrae el título de una entrada .bib ('' si no existe)."""
+    title_match = re.search(r'(?m)^\s*title\s*=\s*{(.+?)}', entrada, flags=re.DOTALL | re.IGNORECASE)
+    return title_match.group(1).strip().lower() if title_match else ""
+
+def comparar(e1, e2):
+    """
+    Devuelve True si e1 <= e2 según:
+    - Año ascendente
+    - Título ascendente dentro del mismo año
+    """
+    y1, y2 = extraer_year(e1), extraer_year(e2)
+    if y1 < y2:
+        return True
+    elif y1 > y2:
+        return False
+    else:
+        # Mismo año → comparar título
+        return extraer_titulo(e1) <= extraer_titulo(e2)
+
+# -------------------------------
+# Algoritmo QuickSort puro
 # -------------------------------
 
 def partition(arr, low, high):
-    """Función de partición para QuickSort"""
-    pivot = arr[high][0]  # usamos la clave (year, title) como pivote
+    """Función de partición para QuickSort (sin clave–valor)."""
+    pivot = arr[high]
     i = low - 1
     for j in range(low, high):
-        if arr[j][0] <= pivot:
+        if comparar(arr[j], pivot):  # comparación directa
             i += 1
             arr[i], arr[j] = arr[j], arr[i]
     arr[i + 1], arr[high] = arr[high], arr[i + 1]
     return i + 1
 
-
 def quick_sort(arr, low, high):
-    """QuickSort recursivo"""
+    """QuickSort recursivo clásico."""
     if low < high:
         pi = partition(arr, low, high)
         quick_sort(arr, low, pi - 1)
         quick_sort(arr, pi + 1, high)
 
-
 def quicksort_wrapper(arr):
-    """Función envolvente para simplificar llamada"""
+    """Función envolvente para simplificar el uso de QuickSort."""
     quick_sort(arr, 0, len(arr) - 1)
     return arr
 
-
 # -------------------------------
-# Funciones para trabajar con .bib
-# -------------------------------
-
-def extraer_datos(entrada):
-    """Extrae (año, título) de una entrada .bib"""
-    year_match = re.search(r'year\s*=\s*{?(\d{4})}?', entrada, flags=re.IGNORECASE)
-    # usamos ^title para evitar booktitle
-    title_match = re.search(r'(?m)^\s*title\s*=\s*{(.+?)}',
-                            entrada, flags=re.DOTALL | re.IGNORECASE)
-
-    year = int(year_match.group(1)) if year_match else 9999
-    title = title_match.group(1).strip() if title_match else ""
-    return (year, title.lower())
-
-
-# -------------------------------
-# Parte principal
+# Parte principal para .bib
 # -------------------------------
 if __name__ == "__main__":
-    # Leer archivo .bib
+    # 1️⃣ Leer archivo original
     with open("articulos_con_titulo_y_abstract.bib", "r", encoding="utf-8") as f:
         contenido = f.read()
 
-    # Separar entradas
+    # 2️⃣ Separar entradas
     entradas = re.split(r'(?=@\w+{)', contenido, flags=re.MULTILINE)
     entradas = [e.strip() for e in entradas if e.strip()]
 
-    # Preprocesar claves (key, entrada)
-    entradas_con_clave = [(extraer_datos(e), e) for e in entradas]
-
-    # Ordenar con QuickSort
+    # 3️⃣ Ordenar directamente con QuickSort puro
     start_time = time.perf_counter()
-    quicksort_wrapper(entradas_con_clave)
-    entradas_ordenadas = [e for _, e in entradas_con_clave]
+    quicksort_wrapper(entradas)
     end_time = time.perf_counter()
 
-    # Guardar archivo ordenado
+    # 4️⃣ Guardar archivo ordenado
     with open("articulos_ordenados_quickSort.bib", "w", encoding="utf-8") as f:
-        for e in entradas_ordenadas:
+        for e in entradas:
             f.write(e + "\n\n")
 
-    # Reporte
-    print("Ordenamiento completado con QuickSort ")
-    print(f"Total entradas: {len(entradas_ordenadas)}")
-    print(f"Tiempo: {end_time - start_time:.6f} segundos")
-
+    # 5️⃣ Reporte
+    print("✅ Ordenamiento completado con QuickSort (fiel al algoritmo)")
+    print(f"📚 Total entradas: {len(entradas)}")
+    print(f"⏱ Tiempo: {end_time - start_time:.6f} segundos")

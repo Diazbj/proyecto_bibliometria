@@ -2,17 +2,33 @@ import re
 import time
 
 # -------------------------------
-# Algoritmo Bitonic Sort
+# Funciones de comparación
 # -------------------------------
+def obtener_criterio(entrada):
+    """Devuelve (año, título) de la entrada para comparar"""
+    year_match = re.search(r'year\s*=\s*{?(\d{4})}?', entrada, flags=re.IGNORECASE)
+    title_match = re.search(r'(?m)^\s*title\s*=\s*{(.+?)}', entrada, flags=re.DOTALL | re.IGNORECASE)
 
+    year = int(year_match.group(1)) if year_match else 9999
+    title = title_match.group(1).strip().lower() if title_match else ""
+    return (year, title)
+
+def comparar(e1, e2):
+    """Devuelve True si e1 > e2 según año y título"""
+    y1, t1 = obtener_criterio(e1)
+    y2, t2 = obtener_criterio(e2)
+    if y1 != y2:
+        return y1 > y2
+    return t1 > t2
+
+# -------------------------------
+# Algoritmo Bitonic Sort puro
+# -------------------------------
 def comp_and_swap(arr, i, j, dire):
-    """Compara y hace swap según la dirección"""
-    if (dire == 1 and arr[i][0] > arr[j][0]) or (dire == 0 and arr[i][0] < arr[j][0]):
+    if (dire == 1 and comparar(arr[i], arr[j])) or (dire == 0 and comparar(arr[j], arr[i])):
         arr[i], arr[j] = arr[j], arr[i]
 
-
 def bitonic_merge(arr, low, cnt, dire):
-    """Fusiona secuencia bitónica en orden creciente o decreciente"""
     if cnt > 1:
         k = cnt // 2
         for i in range(low, low + k):
@@ -20,82 +36,62 @@ def bitonic_merge(arr, low, cnt, dire):
         bitonic_merge(arr, low, k, dire)
         bitonic_merge(arr, low + k, k, dire)
 
-
 def bitonic_sort_rec(arr, low, cnt, dire):
-    """QuickSort recursivo"""
     if cnt > 1:
         k = cnt // 2
-        # Orden creciente
-        bitonic_sort_rec(arr, low, k, 1)
-        # Orden decreciente
-        bitonic_sort_rec(arr, low + k, k, 0)
-        # Mezcla secuencia en orden "dire"
+        bitonic_sort_rec(arr, low, k, 1)      # ascendente
+        bitonic_sort_rec(arr, low + k, k, 0)  # descendente
         bitonic_merge(arr, low, cnt, dire)
 
-
 def bitonic_sort(arr, up=1):
-    """Ordena usando Bitonic Sort"""
-    n = len(arr)
-    bitonic_sort_rec(arr, 0, n, up)
+    bitonic_sort_rec(arr, 0, len(arr), up)
     return arr
 
-
 # -------------------------------
-# Funciones para trabajar con .bib
+# Utilidades
 # -------------------------------
-
-def extraer_datos(entrada):
-    """Extrae (año, título) de una entrada .bib"""
-    year_match = re.search(r'year\s*=\s*{?(\d{4})}?', entrada, flags=re.IGNORECASE)
-    title_match = re.search(r'(?m)^\s*title\s*=\s*{(.+?)}',
-                            entrada, flags=re.DOTALL | re.IGNORECASE)
-
-    year = int(year_match.group(1)) if year_match else 9999
-    title = title_match.group(1).strip() if title_match else ""
-    return (year, title.lower())
-
-
 def siguiente_potencia_de_dos(x):
     """Devuelve la siguiente potencia de 2 >= x"""
     return 1 << (x - 1).bit_length()
 
+# -------------------------------
+# Wrapper para usar en Representacion.py
+# -------------------------------
+def bitonic_sort_wrapper(arr):
+    """Envuelve Bitonic Sort para manejar listas no potencia de 2"""
+    entradas = arr[:]  # copia para no modificar la original
+
+    # Rellenar hasta potencia de 2
+    n = len(entradas)
+    m = siguiente_potencia_de_dos(n)
+    while len(entradas) < m:
+        entradas.append("year = {9999}, title = {zzzzzzzz}")  # marcador
+
+    # Ejecutar Bitonic Sort
+    bitonic_sort(entradas, up=1)
+
+    # Eliminar los marcadores
+    entradas_ordenadas = [e for e in entradas if "zzzzzzzz" not in e]
+    return entradas_ordenadas
 
 # -------------------------------
 # Parte principal
 # -------------------------------
 if __name__ == "__main__":
-    # Leer archivo .bib
     with open("articulos_con_titulo_y_abstract.bib", "r", encoding="utf-8") as f:
         contenido = f.read()
 
-    # Separar entradas
     entradas = re.split(r'(?=@\w+{)', contenido, flags=re.MULTILINE)
     entradas = [e.strip() for e in entradas if e.strip()]
 
-    # Preprocesar claves
-    entradas_con_clave = [(extraer_datos(e), e) for e in entradas]
-
-    # Rellenar hasta la siguiente potencia de 2
-    n = len(entradas_con_clave)
-    m = siguiente_potencia_de_dos(n)
-    while len(entradas_con_clave) < m:
-        entradas_con_clave.append(((9999, "zzzzzzzzzz"), None))  # marcador que quedará al final
-
-    # Ordenar con Bitonic Sort
     start_time = time.perf_counter()
-    bitonic_sort(entradas_con_clave, up=1)
+    entradas_ordenadas = bitonic_sort_wrapper(entradas)
     end_time = time.perf_counter()
 
-    # Recuperar eliminando los marcadores
-    entradas_ordenadas = [e for _, e in entradas_con_clave if e is not None]
-
-    # Guardar archivo ordenado
     with open("articulos_ordenados_bitonicSort.bib", "w", encoding="utf-8") as f:
         for e in entradas_ordenadas:
             f.write(e + "\n\n")
 
-    # Reporte
-    print("Ordenamiento completado con Bitonic Sort ✅")
-    print(f"Total entradas: {len(entradas_ordenadas)}")
-    print(f"Tiempo: {end_time - start_time:.6f} segundos")
-    print("Complejidad teórica Bitonic Sort: O(n log² n)")
+    print("✅ Ordenamiento completado con Bitonic Sort (wrapper corregido)")
+    print(f"📚 Total entradas: {len(entradas_ordenadas)}")
+    print(f"⏱ Tiempo: {end_time - start_time:.6f} segundos")

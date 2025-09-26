@@ -2,15 +2,40 @@ import re
 import time
 
 # -------------------------------
-# Comb Sort
+# Funciones auxiliares
 # -------------------------------
-def getNextGap(gap):
-    gap = (gap * 10) // 13
-    if gap < 1:
-        return 1
-    return gap
 
-def combSort(arr, key=lambda x: x):
+def extraer_year(entrada):
+    """Extrae el año de una entrada .bib o devuelve 9999 si no existe."""
+    match = re.search(r'year\s*=\s*{?(\d{4})}?', entrada, flags=re.IGNORECASE)
+    return int(match.group(1)) if match else 9999
+
+def extraer_titulo(entrada):
+    """Extrae el título de una entrada .bib o devuelve cadena vacía si no existe."""
+    match = re.search(r'(?m)^\s*title\s*=\s*{(.+?)}', entrada, flags=re.DOTALL | re.IGNORECASE)
+    return match.group(1).strip().lower() if match else ""
+
+def es_mayor(e1, e2):
+    """
+    ✅ Devuelve True si e1 > e2 comparando primero por año y luego por título.
+    """
+    y1, y2 = extraer_year(e1), extraer_year(e2)
+    if y1 != y2:
+        return y1 > y2
+    return extraer_titulo(e1) > extraer_titulo(e2)
+
+
+# -------------------------------
+# Algoritmo Comb Sort (fiel)
+# -------------------------------
+
+def getNextGap(gap):
+    """Reduce el gap usando el factor de contracción estándar (1.3 aprox)."""
+    gap = (gap * 10) // 13
+    return 1 if gap < 1 else gap
+
+def comb_sort(arr):
+    """Ordena una lista de entradas .bib por año y título usando Comb Sort puro."""
     n = len(arr)
     gap = n
     swapped = True
@@ -20,41 +45,34 @@ def combSort(arr, key=lambda x: x):
         swapped = False
 
         for i in range(0, n - gap):
-            if key(arr[i]) > key(arr[i + gap]):
+            if es_mayor(arr[i], arr[i + gap]):
                 arr[i], arr[i + gap] = arr[i + gap], arr[i]
                 swapped = True
 
 
 # -------------------------------
-# Parte principal para .bib
+# Parte principal
 # -------------------------------
-with open("articulos_con_titulo_y_abstract.bib", "r", encoding="utf-8") as f:
-    contenido = f.read()
+if __name__ == "__main__":
+    # Leer archivo .bib
+    with open("articulos_con_titulo_y_abstract.bib", "r", encoding="utf-8") as f:
+        contenido = f.read()
 
-# Separar entradas .bib
-entradas = re.split(r'(?=@\w+{)', contenido, flags=re.MULTILINE)
+    # Separar entradas
+    entradas = re.split(r'(?=@\w+{)', contenido, flags=re.MULTILINE)
+    entradas = [e.strip() for e in entradas if e.strip()]
 
-def extraer_datos(entrada):
-    year_match = re.search(r'year\s*=\s*[{"](\d+)[}"]', entrada)
-    title_match = re.search(r'(?m)^\s*title\s*=\s*[{"](.+?)[}"]', entrada, flags=re.DOTALL)
-    year = int(year_match.group(1)) if year_match else 9999
-    title = title_match.group(1).strip() if title_match else ""
-    return (year, title)
+    # Ordenar con Comb Sort fiel
+    start_time = time.perf_counter()
+    comb_sort(entradas)
+    end_time = time.perf_counter()
 
-# Filtrar entradas válidas
-entradas = [e.strip() for e in entradas if e.strip()]
+    # Guardar archivo ordenado
+    with open("articulos_ordenados_combSort.bib", "w", encoding="utf-8") as f:
+        for e in entradas:
+            f.write(e + "\n\n")
 
-# Ordenar usando combSort con clave (year, title)
-start_time = time.perf_counter()
-combSort(entradas, key=lambda e: extraer_datos(e))
-end_time = time.perf_counter()
-
-# Guardar archivo ordenado
-with open("articulos_ordenados_combSort.bib", "w", encoding="utf-8") as f:
-    for e in entradas:
-        f.write(e + "\n\n")
-
-print("Ordenamiento completado con CombSort ✅")
-print(f"Total entradas: {len(entradas)}")
-print(f"Tiempo: {end_time - start_time:.6f} segundos")
-
+    # Reporte
+    print("✅ Ordenamiento completado con Comb Sort (fiel al algoritmo)")
+    print(f"📚 Total entradas: {len(entradas)}")
+    print(f"⏱ Tiempo: {end_time - start_time:.6f} segundos")
