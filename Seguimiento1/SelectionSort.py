@@ -48,7 +48,7 @@ entradas = re.split(r'(?=@\w+{)', contenido, flags=re.MULTILINE)
 entradas = [e.strip() for e in entradas if e.strip()]
 
 # -------------------------------
-# 🚀 Ordenar con Selection Sort fiel
+# Ordenar con Selection Sort fiel
 # -------------------------------
 start_time = time.perf_counter()
 selectionSort(entradas)
@@ -59,6 +59,6 @@ with open("articulos_ordenados_selectionSort.bib", "w", encoding="utf-8") as f:
     for e in entradas:
         f.write(e + "\n\n")
 
-print("✅ Ordenamiento completado con Selection Sort (por año y título)")
-print(f"📄 Total entradas: {len(entradas)}")
-print(f"⏱️ Tiempo: {end_time - start_time:.6f} segundos")
+print(" Ordenamiento completado con Selection Sort (por año y título)")
+print(f" Total entradas: {len(entradas)}")
+print(f" Tiempo: {end_time - start_time:.6f} segundos")

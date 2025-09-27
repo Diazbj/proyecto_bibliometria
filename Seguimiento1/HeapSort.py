@@ -19,8 +19,8 @@ def extraer_titulo(entrada):
 def comparar(e1, e2):
     """
     Compara dos entradas según:
-    1️⃣ Año ascendente
-    2️⃣ Título ascendente
+    Año ascendente
+    Título ascendente
     Retorna True si e1 > e2 (para construir un max-heap)
     """
     year1, year2 = extraer_year(e1), extraer_year(e2)
@@ -51,11 +51,11 @@ def heap_sort(arr):
     """HeapSort que ordena por año y luego título (ascendente)."""
     n = len(arr)
 
-    # 1️⃣ Construir max-heap
+    # Construir max-heap
     for i in range(n // 2 - 1, -1, -1):
         heapify(arr, n, i)
 
-    # 2️⃣ Extraer elementos uno por uno
+    # Extraer elementos uno por uno
     for i in range(n - 1, 0, -1):
         arr[0], arr[i] = arr[i], arr[0]
         heapify(arr, i, 0)
@@ -83,6 +83,6 @@ if __name__ == "__main__":
             f.write(e + "\n\n")
 
     # Reporte
-    print("✅ Ordenamiento completado con HeapSort (fiel al algoritmo)")
-    print(f"📚 Total entradas: {len(entradas)}")
-    print(f"⏱ Tiempo: {end_time - start_time:.6f} segundos")
+    print(" Ordenamiento completado con HeapSort (fiel al algoritmo)")
+    print(f" Total entradas: {len(entradas)}")
+    print(f" Tiempo: {end_time - start_time:.6f} segundos")

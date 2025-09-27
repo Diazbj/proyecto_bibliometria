@@ -17,7 +17,7 @@ def extraer_titulo(entrada):
 
 def es_mayor(e1, e2):
     """
-    ✅ Devuelve True si e1 > e2 comparando primero por año y luego por título.
+    Devuelve True si e1 > e2 comparando primero por año y luego por título.
     """
     y1, y2 = extraer_year(e1), extraer_year(e2)
     if y1 != y2:
@@ -73,6 +73,6 @@ if __name__ == "__main__":
             f.write(e + "\n\n")
 
     # Reporte
-    print("✅ Ordenamiento completado con Comb Sort (fiel al algoritmo)")
-    print(f"📚 Total entradas: {len(entradas)}")
-    print(f"⏱ Tiempo: {end_time - start_time:.6f} segundos")
+    print(" Ordenamiento completado con Comb Sort (fiel al algoritmo)")
+    print(f" Total entradas: {len(entradas)}")
+    print(f" Tiempo: {end_time - start_time:.6f} segundos")

@@ -92,6 +92,6 @@ if __name__ == "__main__":
         for e in entradas_ordenadas:
             f.write(e + "\n\n")
 
-    print("✅ Ordenamiento completado con Bitonic Sort (wrapper corregido)")
-    print(f"📚 Total entradas: {len(entradas_ordenadas)}")
-    print(f"⏱ Tiempo: {end_time - start_time:.6f} segundos")
+    print(" Ordenamiento completado con Bitonic Sort (wrapper corregido)")
+    print(f" Total entradas: {len(entradas_ordenadas)}")
+    print(f" Tiempo: {end_time - start_time:.6f} segundos")

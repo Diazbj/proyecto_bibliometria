@@ -46,15 +46,15 @@ def medir_tiempo(func, arr):
 # Parte principal
 # -------------------------------
 if __name__ == "__main__":
-    # 1️⃣ Leer archivo .bib
+    # Leer archivo .bib
     with open("articulos_con_titulo_y_abstract.bib", "r", encoding="utf-8") as f:
         contenido = f.read()
 
-    # 2️⃣ Separar entradas
+    #  Separar entradas
     entradas = re.split(r'(?=@\w+{)', contenido, flags=re.MULTILINE)
     entradas = [e.strip() for e in entradas if e.strip()]
 
-    # 3️⃣ Definir algoritmos a probar
+    #  Definir algoritmos a probar
     algoritmos = {
         "tree_sort": tree_sort,
         "binary_insert": binary_insertion_sort,
@@ -70,15 +70,15 @@ if __name__ == "__main__":
         "TimSort": timSort
     }
 
-    # 4️⃣ Medir tiempos
+    #  Medir tiempos
     tiempos = {}
     for nombre, func in algoritmos.items():
-        print(f"⏳ Ejecutando {nombre} ...")
+        print(f" Ejecutando {nombre} ...")
         t = medir_tiempo(func, entradas)
         tiempos[nombre] = t
         print(f"   → {t:.6f} segundos")
 
-    # 5️⃣ Graficar tiempos
+    #  Graficar tiempos
     tiempos_ordenados = dict(sorted(tiempos.items(), key=lambda x: x[1]))
     plt.bar(tiempos_ordenados.keys(), tiempos_ordenados.values())
     plt.xticks(rotation=45, ha="right")
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     plt.tight_layout()
     plt.show()
 
-    # 6️⃣ Top 15 autores
+    #  Top 15 autores
     autores = []
     for entrada in entradas:
         autores.extend(extraer_autores(entrada))
@@ -95,11 +95,11 @@ if __name__ == "__main__":
     contador = Counter(autores)
     top15 = contador.most_common(15)
 
-    print("\n📊 Top 15 autores con más apariciones:")
+    print("\n Top 15 autores con más apariciones:")
     for autor, freq in top15:
         print(f"{autor}: {freq}")
 
-    # 7️⃣ Gráfico de autores
+    #  Gráfico de autores
     autores_labels = [autor for autor, _ in top15]
     frecuencias = [freq for _, freq in top15]
 
