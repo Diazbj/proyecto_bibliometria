@@ -16,7 +16,7 @@ def concat_bib_files(folder, output_file):
                 filepath = os.path.join(folder, filename)
                 with open(filepath, "r", encoding="utf-8") as infile:
                     outfile.write(infile.read() + "\n")
-    print(f"📂 Archivos de {folder} concatenados en {output_file}")
+    print(f" Archivos de {folder} concatenados en {output_file}")
 
 
 # -------------------------------------------------------------------
@@ -76,37 +76,37 @@ def save_bib(entries, filename):
 
     with open(filename, "w", encoding="utf-8") as bibfile:
         bibfile.write(writer.write(db))
-    print(f"💾 Guardado {len(entries)} registros en {filename}")
+    print(f"Guardado {len(entries)} registros en {filename}")
 
 
 # -------------------------------------------------------------------
 # MAIN PIPELINE
 # -------------------------------------------------------------------
 if __name__ == "__main__":
-    # 📂 Rutas de las carpetas de entrada
+    # Rutas de las carpetas de entrada
     acm_folder = "archivos/descargaACM"
     sd_folder = "archivos/descargaScienceDirect"
 
-    # 📂 Archivos concatenados
+    # Archivos concatenados
     acm_raw = "archivos/acm_raw.bib"
     sd_raw = "archivos/sciencedirect_raw.bib"
 
-    # 1️⃣ Concatenar todos los .bib en uno solo por fuente
+    #  Concatenar todos los .bib en uno solo por fuente
     concat_bib_files(acm_folder, acm_raw)
     concat_bib_files(sd_folder, sd_raw)
 
-    # 2️⃣ Cargar ambos archivos grandes
+    #Cargar ambos archivos grandes
     acm_entries = load_bib_file(acm_raw)
     sd_entries = load_bib_file(sd_raw)
 
-    print(f"✅ Cargados: ACM={len(acm_entries)} | SD={len(sd_entries)}")
+    print(f" Cargados: ACM={len(acm_entries)} | SD={len(sd_entries)}")
 
-    # 3️⃣ Unificar y eliminar duplicados
+    #  Unificar y eliminar duplicados
     all_entries = acm_entries + sd_entries
     merged, duplicates = merge_entries(all_entries)
 
-    # 4️⃣ Guardar resultados finales
+    #  Guardar resultados finales
     save_bib(merged, "archivos/articulos_unificados.bib")
     save_bib(duplicates, "archivos/articulos_duplicados.bib")
 
-    print(f"📊 Resultado final → Unificados: {len(merged)} | Duplicados: {len(duplicates)}")
+    print(f" Resultado final → Unificados: {len(merged)} | Duplicados: {len(duplicates)}")

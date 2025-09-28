@@ -5,7 +5,7 @@ import os
 def run_script(script_name):
     """Ejecuta un script Python y captura su salida"""
     try:
-        print(f"\n🚀 Ejecutando {script_name} ...\n")
+        print(f"\n Ejecutando {script_name} ...\n")
         result = subprocess.run(
             [sys.executable, script_name],
             capture_output=True,

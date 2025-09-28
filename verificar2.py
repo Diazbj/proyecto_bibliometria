@@ -41,7 +41,7 @@ def verificar_y_filtrar(input_file, output_validos, output_eliminados):
 
 if __name__ == "__main__":
     # Archivo que quieres verificar
-    archivo_bib = "archivos/articulos_unicos.bib"
+    archivo_bib = "archivos/articulos_unificados.bib"
     archivo_validos = "archivos/articulos_con_titulo_y_abstract.bib"
     archivo_eliminados = "archivos/articulos_eliminados.bib"
 
