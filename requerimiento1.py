@@ -12,7 +12,7 @@ def concat_bib_files(folders, output_file):
                     filepath = os.path.join(folder, filename)
                     with open(filepath, "r", encoding="utf-8") as infile:
                         outfile.write(infile.read() + "\n")
-    print(f"📂 Archivos de {folders} concatenados en {output_file}")
+    print(f" Archivos de {folders} concatenados en {output_file}")
 
 
 def remove_duplicates(input_file, output_unique, output_duplicates, key="title"):

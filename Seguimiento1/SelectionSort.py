@@ -24,7 +24,7 @@ def selectionSort(arr):
                 title_min = title_j
 
         # Intercambiar elementos
-        arr[i], arr[min_idx] = arr[min_idx], arr[i]
+        (arr[i], arr[min_idx]) = (arr[min_idx],arr[i])
 
 # -------------------------------
 # Funciones auxiliares
