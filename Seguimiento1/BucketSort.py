@@ -2,7 +2,7 @@ import re
 import time
 
 # -------------------------------
-# 🧠 Funciones auxiliares
+#  Funciones auxiliares
 # -------------------------------
 
 def extraer_year(entrada):
@@ -17,7 +17,7 @@ def extraer_titulo(entrada):
 
 def es_mayor(e1, e2):
     """
-    ✅ Compara dos entradas .bib devolviendo True si e1 > e2
+     Compara dos entradas .bib devolviendo True si e1 > e2
     según (año ascendente, luego título ascendente).
     """
     y1, y2 = extraer_year(e1), extraer_year(e2)
@@ -27,7 +27,7 @@ def es_mayor(e1, e2):
 
 
 # -------------------------------
-# 🪣 Bucket Sort (fiel al algoritmo)
+#  Bucket Sort (fiel al algoritmo)
 # -------------------------------
 
 def insertion_sort_bucket(bucket):
@@ -46,15 +46,15 @@ def bucket_sort(arr):
     if n == 0:
         return arr
 
-    # 📆 Obtener rango de años
+    #  Obtener rango de años
     years = [extraer_year(e) for e in arr]
     min_year, max_year = min(years), max(years)
     rango = max_year - min_year + 1
 
-    # 🪣 Crear buckets
+    #  Crear buckets
     buckets = [[] for _ in range(n)]
 
-    # 📥 Distribuir entradas en buckets según el año
+    #  Distribuir entradas en buckets según el año
     for entrada in arr:
         year = extraer_year(entrada)
         if max_year == min_year:
@@ -63,12 +63,12 @@ def bucket_sort(arr):
             idx = int((year - min_year) / (max_year - min_year) * (n - 1))
         buckets[idx].append(entrada)
 
-    # 📤 Ordenar cada bucket con Insertion Sort
+    #  Ordenar cada bucket con Insertion Sort
     for b in buckets:
         if b:
             insertion_sort_bucket(b)
 
-    # 📚 Concatenar resultados
+    # Concatenar resultados
     resultado = []
     for b in buckets:
         resultado.extend(b)
@@ -77,28 +77,28 @@ def bucket_sort(arr):
 
 
 # -------------------------------
-# 🚀 Parte principal
+#  Parte principal
 # -------------------------------
 if __name__ == "__main__":
-    # 1️⃣ Leer archivo original
+    #  Leer archivo original
     with open("articulos_con_titulo_y_abstract.bib", "r", encoding="utf-8") as f:
         contenido = f.read()
 
-    # 2️⃣ Separar entradas
+    #  Separar entradas
     entradas = re.split(r'(?=@\w+{)', contenido, flags=re.MULTILINE)
     entradas = [e.strip() for e in entradas if e.strip()]
 
-    # 3️⃣ Ordenar con Bucket Sort fiel
+    #  Ordenar con Bucket Sort fiel
     start_time = time.perf_counter()
     entradas_ordenadas = bucket_sort(entradas)
     end_time = time.perf_counter()
 
-    # 4️⃣ Guardar archivo ordenado
+    #  Guardar archivo ordenado
     with open("articulos_ordenados_bucketSort.bib", "w", encoding="utf-8") as f:
         for e in entradas_ordenadas:
             f.write(e + "\n\n")
 
-    # 5️⃣ Reporte final
-    print("✅ Ordenamiento completado con Bucket Sort (fiel al algoritmo)")
-    print(f"📚 Total entradas: {len(entradas_ordenadas)}")
-    print(f"⏱ Tiempo: {end_time - start_time:.6f} segundos")
+    #  Reporte final
+    print(" Ordenamiento completado con Bucket Sort (fiel al algoritmo)")
+    print(f" Total entradas: {len(entradas_ordenadas)}")
+    print(f" Tiempo: {end_time - start_time:.6f} segundos")

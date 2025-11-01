@@ -119,7 +119,7 @@ class ScienceDirectDescarga():
                 )
                 email_input.send_keys(correo)
                 email_input.send_keys(u'\ue007')
-                print("📧 Correo ingresado")
+                print(" Correo ingresado")
                 human_wait(2, 4)
             except:
                 print(" No pidió correo.")
@@ -171,14 +171,14 @@ class ScienceDirectDescarga():
             )
             ActionChains(self.driver).move_to_element(export_btn).perform()
             self.driver.execute_script("arguments[0].click();", export_btn)
-            print("📤 Menú Export abierto.")
+            print(" Menú Export abierto.")
             human_wait(2, 4)
 
             bibtex_btn = self.wait.until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-aa-button='srp-export-multi-bibtex']"))
             )
             self.driver.execute_script("arguments[0].click();", bibtex_btn)
-            print("📥 Exportación a BibTeX lanzada.")
+            print(" Exportación a BibTeX lanzada.")
 
             self.esperar_descarga()
             human_wait(3, 6)
@@ -192,7 +192,7 @@ class ScienceDirectDescarga():
                 EC.element_to_be_clickable((By.XPATH, "//a[@data-aa-name='srp-next-page']"))
             )
             self.driver.execute_script("arguments[0].click();", siguiente)
-            print("➡️ Pasando a la siguiente página")
+            print(" Pasando a la siguiente página")
             self.esperar_overlay()
 
             # Scroll humano después de cargar la página
@@ -242,7 +242,7 @@ class ScienceDirectDescarga():
             raise Exception(" No se encontró el enlace de ScienceDirect en la página")
 
         self.driver.execute_script("arguments[0].click();", enlace_sciencedirect)
-        print("🔗 Click en ScienceDirect (Descubridor)")
+        print(" Click en ScienceDirect (Descubridor)")
 
         self.driver.switch_to.window(self.driver.window_handles[-1])
         print(" Cambiado a pestaña de proxy UQ")

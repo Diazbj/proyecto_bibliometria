@@ -1,11 +1,13 @@
 import subprocess
 import sys
 import os
+import time
+
 
 def run_script(script_name):
     """Ejecuta un script Python y captura su salida"""
     try:
-        print(f"\n🚀 Ejecutando {script_name} ...\n")
+        print(f"\n Ejecutando {script_name} ...\n")
         result = subprocess.run(
             [sys.executable, script_name],
             capture_output=True,
@@ -34,5 +36,6 @@ if __name__ == "__main__":
 
     for script in scripts:
         run_script(script)
+        time.sleep(5)
 
     print("\n Flujo completo terminado")

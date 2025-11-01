@@ -120,6 +120,6 @@ if __name__ == "__main__":
         for e in entradas:
             f.write(e + "\n\n")
 
-    print("✅ Ordenamiento completado con TimSort (fiel, sin clave)")
-    print(f"📄 Total entradas: {len(entradas)}")
-    print(f"⏱️ Tiempo: {end_time - start_time:.6f} segundos")
+    print("Ordenamiento completado con TimSort (fiel, sin clave)")
+    print(f" Total entradas: {len(entradas)}")
+    print(f" Tiempo: {end_time - start_time:.6f} segundos")

@@ -92,6 +92,6 @@ if __name__ == "__main__":
             f.write(e + "\n\n")
 
     # Reporte
-    print("✅ Ordenamiento completado con Tree Sort (fiel, sin clave)")
-    print(f"📄 Total entradas: {len(entradas_ordenadas)}")
-    print(f"⏱️ Tiempo: {end_time - start_time:.6f} segundos")
+    print(" Ordenamiento completado con Tree Sort (fiel, sin clave)")
+    print(f" Total entradas: {len(entradas_ordenadas)}")
+    print(f" Tiempo: {end_time - start_time:.6f} segundos")

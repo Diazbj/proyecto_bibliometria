@@ -19,7 +19,7 @@ def extraer_titulo(entrada):
 def es_mayor(e1, e2):
     """
     Compara dos entradas:
-    ✅ Devuelve True si e1 > e2 según (año, título)
+     Devuelve True si e1 > e2 según (año, título)
     """
     year1, year2 = extraer_year(e1), extraer_year(e2)
     if year1 != year2:
@@ -70,6 +70,6 @@ if __name__ == "__main__":
             f.write(e + "\n\n")
 
     # Reporte final
-    print("✅ Ordenamiento completado con Gnome Sort (fiel al algoritmo)")
-    print(f"📚 Total entradas: {len(entradas)}")
-    print(f"⏱ Tiempo: {end_time - start_time:.6f} segundos")
+    print(" Ordenamiento completado con Gnome Sort (fiel al algoritmo)")
+    print(f" Total entradas: {len(entradas)}")
+    print(f" Tiempo: {end_time - start_time:.6f} segundos")

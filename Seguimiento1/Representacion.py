@@ -73,7 +73,7 @@ if __name__ == "__main__":
     # Medir tiempos
     tiempos = {}
     for nombre, func in algoritmos.items():
-        print(f"⏳ Ejecutando {nombre} ...")
+        print(f" Ejecutando {nombre} ...")
         t = medir_tiempo(func, entradas)
         tiempos[nombre] = t
         print(f"   → {t:.6f} segundos")

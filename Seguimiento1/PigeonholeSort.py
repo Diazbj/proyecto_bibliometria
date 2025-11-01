@@ -48,25 +48,25 @@ def pigeonholeSort(arr):
 # Parte principal para .bib
 # -------------------------------
 if __name__ == "__main__":
-    # 1️⃣ Leer archivo original
+    # Leer archivo original
     with open("articulos_con_titulo_y_abstract.bib", "r", encoding="utf-8") as f:
         contenido = f.read()
 
-    # 2️⃣ Separar entradas
+    #  Separar entradas
     entradas = re.split(r'(?=@\w+{)', contenido, flags=re.MULTILINE)
     entradas = [e.strip() for e in entradas if e.strip()]
 
-    # 3️⃣ Ordenar con Pigeonhole Sort fiel
+    #  Ordenar con Pigeonhole Sort fiel
     start_time = time.perf_counter()
     entradas_ordenadas = pigeonholeSort(entradas)
     end_time = time.perf_counter()
 
-    # 4️⃣ Guardar archivo ordenado
+    #  Guardar archivo ordenado
     with open("articulos_ordenados_pigeonholeSort.bib", "w", encoding="utf-8") as f:
         for e in entradas_ordenadas:
             f.write(e + "\n\n")
 
-    # 5️⃣ Reporte
-    print("✅ Ordenamiento completado con Pigeonhole Sort (fiel al algoritmo)")
-    print(f"📚 Total entradas: {len(entradas_ordenadas)}")
-    print(f"⏱ Tiempo: {end_time - start_time:.6f} segundos")
+    #  Reporte
+    print("Ordenamiento completado con Pigeonhole Sort (fiel al algoritmo)")
+    print(f" Total entradas: {len(entradas_ordenadas)}")
+    print(f" Tiempo: {end_time - start_time:.6f} segundos")
