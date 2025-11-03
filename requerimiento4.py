@@ -29,8 +29,6 @@ def realizar_clustering_y_graficar(embeddings, labels, method, file_name):
     """
     print(f"\nEjecutando clustering con el método: '{method}'...")
 
-    # CORRECCIÓN: El método 'ward' solo funciona con métrica 'euclidean'.
-    # Para otros métodos, 'cosine' es más apropiado para embeddings de SBERT.
     metric_to_use = 'euclidean' if method == 'ward' else 'cosine'
     print(f"Usando la métrica de distancia: '{metric_to_use}'")
 
@@ -84,7 +82,6 @@ if __name__ == "__main__":
 
         # --- 2. Transformación de Texto a Vectores (Embeddings) ---
         print("\nCargando modelo Sentence-BERT para vectorizar los abstracts...")
-        # Usamos el mismo modelo que en el Req. 2 para consistencia
         model = SentenceTransformer('all-MiniLM-L6-v2')
         print("Generando embeddings... (esto puede tardar)")
         embeddings = model.encode(corpus_abstracts, show_progress_bar=True)
@@ -93,7 +90,7 @@ if __name__ == "__main__":
         metodos_clustering = ['ward', 'complete', 'average']
         
         for metodo in metodos_clustering:
-            nombre_archivo = f"dendrograma_{metodo}.png"
+            nombre_archivo = "dendrograma_{}.png".format(metodo)
             realizar_clustering_y_graficar(embeddings, labels, metodo, nombre_archivo)
             
         print("\nAnálisis de coherencia:")

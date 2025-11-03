@@ -68,5 +68,3 @@ if __name__ == "__main__":
 
     # Paso 2: eliminar duplicados entre ACM y ScienceDirect
     remove_duplicates(all_raw, final_clean, duplicates_file, key="title")
-    # Si tus registros tienen DOI, mejor usar:
-    # remove_duplicates(all_raw, final_clean, duplicates_file, key="doi")

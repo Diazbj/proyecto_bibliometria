@@ -98,15 +98,43 @@ if __name__ == "__main__":
     
     print(f"Grafo construido con {grafo_citaciones.number_of_nodes()} nodos y {grafo_citaciones.number_of_edges()} aristas.")
     
-    # Ejemplo de uso de las funciones
-    if len(grafo_citaciones.nodes) > 1:
-        nodos = list(grafo_citaciones.nodes)
-        nodo_origen = nodos[0]
-        nodo_destino = nodos[-1]
+    # --- PASO 3: Analizar la conectividad de la red ---
+    print("\n--- Análisis de Conectividad de la Red ---")
+    if grafo_citaciones.number_of_nodes() > 1:
         
-        print(f"\nCalculando el camino mínimo entre '{nodo_origen}' y '{nodo_destino}':")
-        camino = encontrar_camino_minimo(grafo_citaciones, nodo_origen, nodo_destino)
-        print(camino)
+        G_undirected = grafo_citaciones.to_undirected()
+        
+        # Encontrar todos los componentes conectados
+        componentes_conectados = list(nx.connected_components(G_undirected))
+        
+        if componentes_conectados:
+            print(f"Se encontraron {len(componentes_conectados)} componentes conectados (grupos de artículos).")
+            
+            # Encontrar el componente más grande (a menudo llamado el "componente gigante")
+            componente_gigante_nodos = max(componentes_conectados, key=len)
+            
+            # Crear un subgrafo que solo contiene el componente gigante
+            componente_gigante_grafo = grafo_citaciones.subgraph(componente_gigante_nodos)
+            
+            print(f"El componente conectado más grande tiene {componente_gigante_grafo.number_of_nodes()} nodos y {componente_gigante_grafo.number_of_edges()} aristas.")
+            
+            if nx.is_strongly_connected(componente_gigante_grafo):
+                print("El componente gigante es fuertemente conectado. Calculando métricas de conectividad:")
+                
+                # Calcular el diámetro del componente (el camino más largo de los caminos más cortos)
+                # Usa Dijkstra o Floyd-Warshall internamente.
+                diametro = nx.diameter(componente_gigante_grafo, weight='weight')
+                print(f"  - Diámetro de la red (basado en similitud): {diametro:.4f}")
+
+                # Calcular el promedio de las longitudes de los caminos mínimos
+                promedio_camino = nx.average_shortest_path_length(componente_gigante_grafo, weight='weight')
+                print(f"  - Longitud promedio del camino mínimo: {promedio_camino:.4f}")
+            else:
+                print("El componente gigante no es fuertemente conectado, por lo que no se puede calcular un único diámetro o promedio de caminos para todo el componente.")
+                # Podríamos analizar las componentes fuertemente conexas DENTRO del componente gigante si fuera necesario.
+
+        else:
+            print("No se encontraron componentes conectados en el grafo.")
 
     # Encontrar y mostrar componentes fuertemente conexas
     print("\nBuscando componentes fuertemente conexas:")
