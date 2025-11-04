@@ -80,6 +80,12 @@ if __name__ == "__main__":
         print("\n--- Nuevas Palabras Clave Generadas por TF-IDF (Top 15) ---")
         for palabra in nuevas_palabras:
             print(f"- {palabra}")
+
+        # Guardar las nuevas palabras clave en un archivo
+        with open('keywords.txt', 'w', encoding='utf-8') as f:
+            for palabra in nuevas_palabras:
+                f.write(f"{palabra}\n")
+        print("\nLas nuevas palabras clave han sido guardadas en 'keywords.txt'")
             
         print("\n--- Análisis de Precisión de las Nuevas Palabras ---")
         

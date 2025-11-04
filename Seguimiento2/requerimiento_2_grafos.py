@@ -2,8 +2,6 @@ import bibtexparser
 import re
 import itertools
 import networkx as nx
-from sklearn.feature_extraction.text import TfidfVectorizer
-import numpy as np
 
 def cargar_abstracts(bib_file):
     """Carga abstracts desde un archivo .bib."""
@@ -16,16 +14,11 @@ def cargar_abstracts(bib_file):
             abstracts.append(entry['abstract'])
     return abstracts
 
-def extraer_terminos_relevantes(abstracts, num_terminos=50):
-    """Extrae términos relevantes usando TF-IDF."""
-    vectorizer = TfidfVectorizer(stop_words='english', ngram_range=(1, 2), max_df=0.85, min_df=3)
-    tfidf_matrix = vectorizer.fit_transform(abstracts)
-    feature_names = np.array(vectorizer.get_feature_names_out())
-    sum_tfidf = tfidf_matrix.sum(axis=0)
-    scores = [(feature_names[col], sum_tfidf[0, col]) for col in range(tfidf_matrix.shape[1])]
-    sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
-    mejores_terminos = [termino for termino, puntaje in sorted_scores[:num_terminos]]
-    return mejores_terminos
+def cargar_palabras_clave(ruta_archivo):
+    """Carga las palabras clave desde un archivo de texto."""
+    with open(ruta_archivo, 'r', encoding='utf-8') as f:
+        palabras_clave = [line.strip() for line in f if line.strip()]
+    return palabras_clave
 
 def construir_grafo_coocurrencia(terminos, abstracts):
     """Construye un grafo de co-ocurrencia de términos."""
@@ -71,9 +64,10 @@ if __name__ == "__main__":
     if abstracts:
         print(f"Se cargaron {len(abstracts)} abstracts.")
         
-        # Extraer los términos más relevantes del corpus
-        terminos_clave = extraer_terminos_relevantes(abstracts, num_terminos=50)
-        print(f"\nSe extrajeron {len(terminos_clave)} términos clave usando TF-IDF.")
+        # Cargar las palabras clave desde el archivo generado por el requerimiento 3
+        ruta_palabras_clave = r'C:\Users\DiazJ\Documents\Universidad\Analisis Algoritmos\ProyectoFinal\proyecto_bibliometria\keywords.txt'
+        terminos_clave = cargar_palabras_clave(ruta_palabras_clave)
+        print(f"\nSe cargaron {len(terminos_clave)} palabras clave desde '{ruta_palabras_clave}'.")
 
         # Construir el grafo de co-ocurrencia
         grafo_coocurrencia = construir_grafo_coocurrencia(terminos_clave, abstracts)
