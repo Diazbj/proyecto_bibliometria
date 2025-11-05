@@ -15,7 +15,7 @@ def construir_grafo_citaciones(articulos, inferir_por_similitud=True, top_n_simi
     """
     Construye un grafo de citaciones.
     1. Usa citaciones explícitas si existen (campo 'cites').
-    2. Opcionalmente, infiere citaciones por similitud de texto.
+    2. infiere citaciones por similitud de texto.
     """
     G = nx.DiGraph()
     
