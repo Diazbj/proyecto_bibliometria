@@ -233,9 +233,11 @@ if __name__ == "__main__":
     if len(lista_articulos) >= 2:
         print(f"Se cargaron {len(lista_articulos)} artículos con título y abstract.")
 
-        # --- Selección de Artículos por el Usuario ---
-        articulo1 = seleccionar_articulo(lista_articulos, "Seleccione el PRIMER artículo para comparar")
-        articulo2 = seleccionar_articulo(lista_articulos, "Seleccione el SEGUNDO artículo para comparar")
+        # --- Selección de Artículos (Modificado para no ser interactivo) ---
+        # Se seleccionan los dos primeros artículos de la lista por defecto.
+        print("Seleccionando los dos primeros artículos de la lista para la comparación automática.")
+        articulo1 = lista_articulos[0]
+        articulo2 = lista_articulos[1]
 
         print(f"\n--- Artículos Seleccionados para Comparación ---")
         print(f"Artículo 1: {articulo1['title']}")

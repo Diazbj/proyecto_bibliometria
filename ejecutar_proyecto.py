@@ -164,7 +164,7 @@ def generar_nube_de_palabras(df, file_name):
     print(f"Nube de palabras guardada en: {file_name}")
     plt.close()
 
-def generar_lineas_tiempo(df):
+def generar_lineas_tiempo(df, output_dir="."):
     print("\n--- Generando Gráficos de Líneas de Tiempo ---")
     if 'year' in df.columns:
         df['year'] = pd.to_numeric(df['year'], errors='coerce')
@@ -174,7 +174,7 @@ def generar_lineas_tiempo(df):
         plt.title('Número de Publicaciones por Año')
         plt.xlabel('Año'); plt.ylabel('Número de Publicaciones')
         plt.xticks(rotation=45); plt.grid(axis='y', linestyle='--'); plt.tight_layout()
-        plt.savefig("linea_temporal_año.png", dpi=300)
+        plt.savefig(os.path.join(output_dir, "linea_temporal_año.png"), dpi=300)
         print("Gráfico de publicaciones por año guardado.")
         plt.close()
     df['venue'] = df['journal'].fillna(df['booktitle'])
@@ -185,7 +185,7 @@ def generar_lineas_tiempo(df):
         plt.title('Top 10 Revistas/Conferencias')
         plt.xlabel('Número de Publicaciones'); plt.ylabel('Revista o Conferencia')
         plt.tight_layout()
-        plt.savefig("publicaciones_por_revista.png", dpi=300)
+        plt.savefig(os.path.join(output_dir, "publicaciones_por_revista.png"), dpi=300)
         print("Gráfico de publicaciones por revista guardado.")
         plt.close()
 
@@ -208,28 +208,40 @@ def generar_mapa_calor(df, file_name):
     fig.write_html(file_name)
     print(f"Mapa de calor guardado en: {file_name}")
 
-def exportar_a_pdf(file_name):
+def exportar_a_pdf(output_dir="."):
     print("\n--- Exportando reporte a PDF ---")
     pdf = FPDF()
-    images = {"nube_de_palabras.png": "1. Nube de Palabras Clave", "linea_temporal_año.png": "2.a. Publicaciones por Año", "publicaciones_por_revista.png": "2.b. Top 10 Revistas/Conferencias"}
+    
+    # Construir rutas completas para las imágenes
+    images = {
+        os.path.join(output_dir, "nube_de_palabras.png"): "1. Nube de Palabras Clave",
+        os.path.join(output_dir, "linea_temporal_año.png"): "2.a. Publicaciones por Año",
+        os.path.join(output_dir, "publicaciones_por_revista.png"): "2.b. Top 10 Revistas/Conferencias"
+    }
+    
     pdf.add_page()
     pdf.set_font('Arial', 'B', 16)
     pdf.cell(0, 10, 'Reporte de Análisis Bibliométrico', 0, 1, 'C')
     pdf.ln(10)
-    for img, title in images.items():
-        if os.path.exists(img):
+    
+    for img_path, title in images.items():
+        if os.path.exists(img_path):
             pdf.set_font('Arial', 'B', 12)
             pdf.cell(0, 10, title, 0, 1)
-            pdf.image(img, x=10, w=190)
+            pdf.image(img_path, x=10, w=190)
             pdf.ln(5)
-    if os.path.exists("mapa_calor_autores.html"):
+            
+    mapa_calor_path = os.path.join(output_dir, "mapa_calor_autores.html")
+    if os.path.exists(mapa_calor_path):
         pdf.add_page()
         pdf.set_font('Arial', 'B', 12)
         pdf.cell(0, 10, '3. Distribución Geográfica (HTML Interactivo)', 0, 1)
         pdf.set_font('Arial', '', 11)
-        pdf.multi_cell(0, 10, 'El mapa de calor es interactivo. Abra el archivo "mapa_calor_autores.html" en un navegador.')
-    pdf.output(file_name)
-    print(f"Reporte PDF guardado en: {file_name}")
+        pdf.multi_cell(0, 10, f'El mapa de calor es interactivo. Abra el archivo "{os.path.basename(mapa_calor_path)}" en un navegador.')
+        
+    pdf_output_path = os.path.join(output_dir, "reporte_visual.pdf")
+    pdf.output(pdf_output_path)
+    print(f"Reporte PDF guardado en: {pdf_output_path}")
 
 # --- Función para cargar artículos (usada por varios requerimientos) ---
 def cargar_articulos_bib_reqs(ruta_archivo):
@@ -242,13 +254,17 @@ def cargar_articulos_bib_reqs(ruta_archivo):
     return articulos
 
 # --- Main Execution Block ---
-def main():
+def main(output_dir="."):
     print("--- INICIANDO EJECUCIÓN COMPLETA DEL PROYECTO ---")
+    
+    # Crear el directorio de salida si no existe
+    os.makedirs(output_dir, exist_ok=True)
     
     # --- REQUERIMIENTO 1: Limpieza y unificación de datos ---
     print("\n--- Ejecutando Requerimiento 1 ---")
     acm_folder = "archivos/descargaACM"
     sd_folder = "archivos/descargaScienceDirect"
+    # Los archivos intermedios se pueden guardar en la raíz o en una carpeta temporal si se prefiere
     all_raw = "archivos/todos_raw.bib"
     final_clean = "archivos/articulos_unicos.bib"
     duplicates_file = "archivos/duplicados.bib"
@@ -309,9 +325,11 @@ def main():
     print("\nNuevas Palabras Clave Generadas por TF-IDF:")
     for palabra in nuevas_palabras:
         print(f"- {palabra}")
-    with open('keywords.txt', 'w', encoding='utf-8') as f:
+    
+    keywords_path = os.path.join(output_dir, 'keywords.txt')
+    with open(keywords_path, 'w', encoding='utf-8') as f:
         f.write('\n'.join(nuevas_palabras))
-    print("Nuevas palabras clave guardadas en 'keywords.txt'")
+    print(f"Nuevas palabras clave guardadas en '{keywords_path}'")
 
     # --- REQUERIMIENTO 4: Clustering Jerárquico ---
     print("\n--- Ejecutando Requerimiento 4 ---")
@@ -326,16 +344,17 @@ def main():
     embeddings = sbert_model_cluster.encode(corpus_demo, show_progress_bar=True)
     
     for metodo in ['ward', 'complete', 'average']:
-        realizar_clustering_y_graficar(embeddings, labels_demo, metodo, f"dendrograma_{metodo}.png")
+        file_name = os.path.join(output_dir, f"dendrograma_{metodo}.png")
+        realizar_clustering_y_graficar(embeddings, labels_demo, metodo, file_name)
 
     # --- REQUERimiento 5: Análisis Visual ---
     print("\n--- Ejecutando Requerimiento 5 ---")
     df_articulos = pd.DataFrame(bibtexparser.load(open(archivo_validos, encoding='utf-8')).entries)
     if not df_articulos.empty:
-        generar_nube_de_palabras(df_articulos, "nube_de_palabras.png")
-        generar_lineas_tiempo(df_articulos)
-        generar_mapa_calor(df_articulos, "mapa_calor_autores.html")
-        exportar_a_pdf("reporte_visual.pdf")
+        generar_nube_de_palabras(df_articulos, os.path.join(output_dir, "nube_de_palabras.png"))
+        generar_lineas_tiempo(df_articulos, output_dir)
+        generar_mapa_calor(df_articulos, os.path.join(output_dir, "mapa_calor_autores.html"))
+        exportar_a_pdf(output_dir)
     else:
         print("No hay artículos en el DataFrame para el análisis visual.")
         
@@ -345,4 +364,5 @@ if __name__ == "__main__":
     # Ignorar advertencias para una salida más limpia
     warnings.filterwarnings("ignore", category=UserWarning, module='matplotlib')
     warnings.filterwarnings("ignore", category=FutureWarning)
-    main()
+    # Para ejecución local, los archivos se guardan en una carpeta 'outputs_local'
+    main(output_dir="outputs_local")
