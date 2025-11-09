@@ -197,12 +197,12 @@ def generar_mapa_calor(df, file_name):
         if not isinstance(aff, str): return None
         country = aff.split(',')[-1].strip()
         country = country_map.get(country, country)
-        try: return pc.country_name_to_country_alpha3(country)
+        try: return pc.country_name_to_country_alpha2(country)
         except: return None
     df['iso_alpha'] = df['author'].apply(get_country)
     country_counts = df.dropna(subset=['iso_alpha'])['iso_alpha'].value_counts().reset_index()
     country_counts.columns = ['iso_alpha', 'publications']
-    country_counts['country'] = country_counts['iso_alpha'].apply(lambda x: pc.country_alpha3_to_country_name(x))
+    country_counts['country'] = country_counts['iso_alpha'].apply(lambda x: pc.country_alpha2_to_country_name(x))
     if country_counts.empty: return
     fig = px.choropleth(country_counts, locations="iso_alpha", color="publications", hover_name="country", color_continuous_scale=px.colors.sequential.Plasma, title="Distribución Geográfica de Publicaciones")
     fig.write_html(file_name)
