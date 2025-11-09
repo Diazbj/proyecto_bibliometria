@@ -264,16 +264,21 @@ def main(output_dir="."):
     print("\n--- Ejecutando Requerimiento 1 ---")
     acm_folder = "archivos/descargaACM"
     sd_folder = "archivos/descargaScienceDirect"
-    # Los archivos intermedios se pueden guardar en la raíz o en una carpeta temporal si se prefiere
     all_raw = "archivos/todos_raw.bib"
     final_clean = "archivos/articulos_unicos.bib"
     duplicates_file = "archivos/duplicados.bib"
     archivo_validos = "archivos/articulos_con_titulo_y_abstract.bib"
     archivo_eliminados = "archivos/articulos_eliminados.bib"
-    
-    concat_bib_files([acm_folder, sd_folder], all_raw)
-    remove_duplicates(all_raw, final_clean, duplicates_file)
-    verificar_y_filtrar(final_clean, archivo_validos, archivo_eliminados)
+
+    # Si el archivo final del requerimiento 1 ya existe, se salta este paso.
+    if os.path.exists(archivo_validos):
+        print("El archivo 'articulos_con_titulo_y_abstract.bib' ya existe.")
+        print("Saltando el paso de unificación y limpieza de datos.")
+    else:
+        print("Procesando archivos .bib. Esto puede tardar un momento...")
+        concat_bib_files([acm_folder, sd_folder], all_raw)
+        remove_duplicates(all_raw, final_clean, duplicates_file)
+        verificar_y_filtrar(final_clean, archivo_validos, archivo_eliminados)
 
     # Cargar los artículos válidos para los siguientes requerimientos
     lista_articulos = cargar_articulos_bib_reqs(archivo_validos)
